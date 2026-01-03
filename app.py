@@ -275,5 +275,5 @@ def clear_history():
     return redirect("/history")
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000) 
+    app.run(host='https://pdf-dorking-production.up.railway.app', port=5000) 
     app.run(debug=True)

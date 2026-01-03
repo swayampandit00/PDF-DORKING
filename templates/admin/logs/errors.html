@@ -1,0 +1,454 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Error Logs - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+    <div class="page-header">
+        <h2><i class="fas fa-exclamation-triangle"></i> Error Logs</h2>
+        <div class="page-actions">
+            <button class="btn btn-primary">
+                <i class="fas fa-download"></i> Export Errors
+            </button>
+            <button class="btn btn-outline-warning">
+                <i class="fas fa-bell"></i> Configure Alerts
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Filters -->
+    <div class="filters-section">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Error Type:</label>
+                <select class="form-select" id="errorTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="500">Server Error (500)</option>
+                    <option value="404">Not Found (404)</option>
+                    <option value="403">Forbidden (403)</option>
+                    <option value="400">Bad Request (400)</option>
+                    <option value="database">Database Error</option>
+                    <option value="network">Network Error</option>
+                    <option value="scraping">Scraping Error</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Severity:</label>
+                <select class="form-select" id="severityFilter">
+                    <option value="">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="error">Error</option>
+                    <option value="warning">Warning</option>
+                    <option value="info">Info</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>User:</label>
+                <input type="text" class="form-control" placeholder="Affected user..." id="userFilter">
+            </div>
+            <div class="filter-group">
+                <label>Date Range:</label>
+                <input type="date" class="form-control" id="startDate">
+                <span>to</span>
+                <input type="date" class="form-control" id="endDate">
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-outline-primary" onclick="applyFilters()">Apply</button>
+                <button class="btn btn-outline-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Logs Table -->
+    <div class="table-container">
+        <table class="table table-striped table-hover" id="errorLogsTable">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Error Type</th>
+                    <th>Severity</th>
+                    <th>Message</th>
+                    <th>User</th>
+                    <th>IP Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Error log entries will be loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Error logs pagination" class="mt-4">
+        <ul class="pagination justify-content-center" id="errorLogsPagination">
+            <!-- Pagination will be generated dynamically -->
+        </ul>
+    </nav>
+
+    <!-- Error Statistics -->
+    <div class="log-stats">
+        <h4>Error Analytics (Last 24 hours)</h4>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" id="totalErrors">156</div>
+                <div class="stat-label">Total Errors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="criticalErrors">12</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="serverErrors">89</div>
+                <div class="stat-label">Server Errors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="clientErrors">55</div>
+                <div class="stat-label">Client Errors</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Trends Chart -->
+    <div class="chart-container">
+        <h4>Error Trends (Last 7 days)</h4>
+        <canvas id="errorTrendsChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Top Error Types -->
+    <div class="error-types-container">
+        <h4>Top Error Types</h4>
+        <div class="error-types-list" id="errorTypesList">
+            <!-- Error types will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadErrorLogs();
+    initializeErrorFilters();
+    loadErrorStats();
+    initializeErrorTrendsChart();
+    loadTopErrorTypes();
+});
+
+function loadErrorLogs(page = 1) {
+    const loader = document.getElementById('adminLoader');
+    loader.style.display = 'flex';
+
+    fetch(`/api/admin/logs/errors?page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            renderErrorLogsTable(data.logs);
+            renderPagination(data.pagination, 'errorLogsPagination', loadErrorLogs);
+            loader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error loading error logs:', error);
+            showToast('Error', 'Failed to load error logs', 'error');
+            loader.style.display = 'none';
+        });
+}
+
+function renderErrorLogsTable(logs) {
+    const tbody = document.querySelector('#errorLogsTable tbody');
+    tbody.innerHTML = '';
+
+    logs.forEach(log => {
+        const severityClass = getSeverityClass(log.severity);
+        const errorTypeClass = getErrorTypeClass(log.error_type);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${formatDateTime(log.timestamp)}</td>
+            <td>
+                <span class="error-type-badge ${errorTypeClass}">
+                    ${log.error_type}
+                </span>
+            </td>
+            <td>
+                <span class="severity-badge ${severityClass}">
+                    ${log.severity}
+                </span>
+            </td>
+            <td>
+                <span class="error-message" title="${log.message}">${truncateText(log.message, 60)}</span>
+            </td>
+            <td>
+                ${log.username ? `
+                <div class="user-cell">
+                    <i class="fas fa-user-circle"></i>
+                    <span>${log.username}</span>
+                </div>
+                ` : 'System'}
+            </td>
+            <td>${log.ip_address || 'N/A'}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewErrorDetails(${log.id})">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-info" onclick="resolveError(${log.id})">
+                    <i class="fas fa-check"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getSeverityClass(severity) {
+    switch (severity.toLowerCase()) {
+        case 'critical': return 'critical';
+        case 'error': return 'danger';
+        case 'warning': return 'warning';
+        case 'info': return 'info';
+        default: return 'secondary';
+    }
+}
+
+function getErrorTypeClass(errorType) {
+    switch (errorType) {
+        case '500': return 'server-error';
+        case '404': return 'not-found';
+        case '403': return 'forbidden';
+        case '400': return 'bad-request';
+        case 'database': return 'database';
+        case 'network': return 'network';
+        case 'scraping': return 'scraping';
+        default: return 'unknown';
+    }
+}
+
+function loadErrorStats() {
+    fetch('/api/admin/logs/errors/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('totalErrors').textContent = data.stats.total_errors.toLocaleString();
+                document.getElementById('criticalErrors').textContent = data.stats.critical_errors.toLocaleString();
+                document.getElementById('serverErrors').textContent = data.stats.server_errors.toLocaleString();
+                document.getElementById('clientErrors').textContent = data.stats.client_errors.toLocaleString();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading error stats:', error);
+        });
+}
+
+function initializeErrorTrendsChart() {
+    fetch('/api/admin/logs/errors/trends')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const ctx = document.getElementById('errorTrendsChart');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.trends.map(t => t.date),
+                        datasets: [{
+                            label: 'Errors',
+                            data: data.trends.map(t => t.count),
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading error trends:', error);
+        });
+}
+
+function loadTopErrorTypes() {
+    fetch('/api/admin/logs/errors/top-types')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('errorTypesList');
+                container.innerHTML = '';
+
+                data.types.forEach(type => {
+                    const typeEl = document.createElement('div');
+                    typeEl.className = 'error-type-item';
+                    typeEl.innerHTML = `
+                        <div class="error-type-info">
+                            <span class="error-type-name">${type.type}</span>
+                            <span class="error-type-count">${type.count}</span>
+                        </div>
+                        <div class="error-type-bar">
+                            <div class="error-type-progress" style="width: ${(type.count / data.types[0].count) * 100}%"></div>
+                        </div>
+                    `;
+                    container.appendChild(typeEl);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading top error types:', error);
+        });
+}
+
+function initializeErrorFilters() {
+    const filters = ['errorTypeFilter', 'severityFilter', 'userFilter', 'startDate', 'endDate'];
+    let searchTimeout;
+
+    filters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadErrorLogs();
+                }, 500);
+            });
+            element.addEventListener('change', () => loadErrorLogs());
+        }
+    });
+}
+
+function applyFilters() {
+    loadErrorLogs();
+}
+
+function clearFilters() {
+    document.getElementById('errorTypeFilter').value = '';
+    document.getElementById('severityFilter').value = '';
+    document.getElementById('userFilter').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    loadErrorLogs();
+}
+
+function viewErrorDetails(errorId) {
+    fetch(`/api/admin/logs/errors/${errorId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showErrorDetailsModal(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading error details:', error);
+            showToast('Error', 'Failed to load error details', 'error');
+        });
+}
+
+function showErrorDetailsModal(error) {
+    const modal = document.getElementById('adminModal');
+    const modalTitle = document.getElementById('adminModalLabel');
+    const modalBody = document.getElementById('adminModalBody');
+
+    modalTitle.textContent = 'Error Details';
+    modalBody.innerHTML = `
+        <div class="error-details">
+            <div class="detail-row">
+                <strong>Error Type:</strong> ${error.error_type}
+            </div>
+            <div class="detail-row">
+                <strong>Severity:</strong>
+                <span class="severity-badge ${getSeverityClass(error.severity)}">
+                    ${error.severity}
+                </span>
+            </div>
+            <div class="detail-row">
+                <strong>Timestamp:</strong> ${formatDateTime(error.timestamp)}
+            </div>
+            <div class="detail-row">
+                <strong>Message:</strong> ${error.message}
+            </div>
+            <div class="detail-row">
+                <strong>Stack Trace:</strong>
+                <pre class="stack-trace">${error.stack_trace || 'No stack trace available'}</pre>
+            </div>
+            <div class="detail-row">
+                <strong>User:</strong> ${error.username || 'System'}
+            </div>
+            <div class="detail-row">
+                <strong>IP Address:</strong> ${error.ip_address || 'N/A'}
+            </div>
+            <div class="detail-row">
+                <strong>User Agent:</strong> ${error.user_agent || 'N/A'}
+            </div>
+            <div class="detail-row">
+                <strong>Request URL:</strong> ${error.request_url || 'N/A'}
+            </div>
+        </div>
+    `;
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+function resolveError(errorId) {
+    fetch(`/api/admin/logs/errors/${errorId}/resolve`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Success', 'Error marked as resolved', 'success');
+            loadErrorLogs();
+        } else {
+            showToast('Error', data.message || 'Failed to resolve error', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error resolving error:', error);
+        showToast('Error', 'Failed to resolve error', 'error');
+    });
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+function renderPagination(pagination, paginationId, loadFunction) {
+    const paginationEl = document.getElementById(paginationId);
+    paginationEl.innerHTML = '';
+
+    for (let i = 1; i <= pagination.total_pages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === pagination.current_page ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="${loadFunction.name}(${i})">${i}</a>`;
+        paginationEl.appendChild(li);
+    }
+}
+
+function showToast(title, message, type = 'info') {
+    const toast = document.getElementById('adminToast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+
+    toast.className = `toast toast-${type}`;
+
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+</script>
+{% endblock %}

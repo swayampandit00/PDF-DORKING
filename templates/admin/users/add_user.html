@@ -1,0 +1,126 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Add User - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="user-add-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h2><i class="fas fa-plus"></i> Add New User</h2>
+        </div>
+    </div>
+
+    <div class="add-form-container">
+        <form id="addUserForm" class="add-form">
+            <div class="form-section">
+                <h4>Account Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">Username *</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <small class="form-text text-muted">Unique username for the user</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <small class="form-text text-muted">Valid email address</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <small class="form-text text-muted">Minimum 8 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Personal Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select class="form-select" id="country" name="country">
+                            <option value="">Select Country</option>
+                            <option value="US">United States</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="CA">Canada</option>
+                            <option value="IN">India</option>
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Account Settings</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="premium">Premium</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Preferences</h4>
+                <div class="form-checks">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="emailNotifications" name="emailNotifications" checked>
+                        <label class="form-check-label" for="emailNotifications">
+                            Send email notifications
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="welcomeEmail" name="welcomeEmail" checked>
+                        <label class="form-check-label" for="welcomeEmail">
+                            Send welcome email
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                <button type="submit" class="btn btn-success">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/templates/admin/users/js/users.js"></script>
+{% endblock %}

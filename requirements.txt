@@ -1,0 +1,6 @@
+flask
+gunicorn
+fpdf
+requests
+beautifulsoup4
+flask-babel

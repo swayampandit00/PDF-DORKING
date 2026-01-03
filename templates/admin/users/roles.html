@@ -1,0 +1,120 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}User Roles - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="roles-container">
+    <div class="page-header">
+        <h2><i class="fas fa-shield-alt"></i> User Roles & Permissions</h2>
+        <div class="page-actions">
+            <button class="btn btn-success" onclick="showAddRoleModal()">
+                <i class="fas fa-plus"></i> Add Role
+            </button>
+        </div>
+    </div>
+
+    <div class="roles-grid">
+        <div class="role-card">
+            <div class="role-header">
+                <h4>Admin</h4>
+                <span class="role-badge admin">System</span>
+            </div>
+            <div class="role-description">
+                <p>Full system access with all permissions</p>
+            </div>
+            <div class="role-permissions">
+                <h5>Permissions:</h5>
+                <ul>
+                    <li><i class="fas fa-check"></i> User Management</li>
+                    <li><i class="fas fa-check"></i> System Settings</li>
+                    <li><i class="fas fa-check"></i> Logs Access</li>
+                    <li><i class="fas fa-check"></i> AI Tools</li>
+                    <li><i class="fas fa-check"></i> Export Data</li>
+                </ul>
+            </div>
+            <div class="role-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="editRole('admin')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </div>
+        </div>
+
+        <div class="role-card">
+            <div class="role-header">
+                <h4>Premium</h4>
+                <span class="role-badge premium">Paid</span>
+            </div>
+            <div class="role-description">
+                <p>Enhanced features with priority support</p>
+            </div>
+            <div class="role-permissions">
+                <h5>Permissions:</h5>
+                <ul>
+                    <li><i class="fas fa-check"></i> Advanced Search</li>
+                    <li><i class="fas fa-check"></i> Bulk Download</li>
+                    <li><i class="fas fa-check"></i> API Access</li>
+                    <li><i class="fas fa-check"></i> Priority Queue</li>
+                    <li><i class="fas fa-times"></i> Admin Panel</li>
+                </ul>
+            </div>
+            <div class="role-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="editRole('premium')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </div>
+        </div>
+
+        <div class="role-card">
+            <div class="role-header">
+                <h4>User</h4>
+                <span class="role-badge user">Default</span>
+            </div>
+            <div class="role-description">
+                <p>Standard user with basic search capabilities</p>
+            </div>
+            <div class="role-permissions">
+                <h5>Permissions:</h5>
+                <ul>
+                    <li><i class="fas fa-check"></i> Basic Search</li>
+                    <li><i class="fas fa-check"></i> Download PDFs</li>
+                    <li><i class="fas fa-check"></i> View History</li>
+                    <li><i class="fas fa-times"></i> Bulk Operations</li>
+                    <li><i class="fas fa-times"></i> Admin Panel</li>
+                </ul>
+            </div>
+            <div class="role-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="editRole('user')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Statistics -->
+    <div class="role-stats">
+        <h4>Role Distribution</h4>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" id="adminCount">5</div>
+                <div class="stat-label">Admins</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="premiumCount">156</div>
+                <div class="stat-label">Premium Users</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="userCount">1,073</div>
+                <div class="stat-label">Regular Users</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/templates/admin/users/js/roles.js"></script>
+{% endblock %}

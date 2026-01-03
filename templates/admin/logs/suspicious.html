@@ -1,0 +1,578 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Suspicious Activity - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+    <div class="page-header">
+        <h2><i class="fas fa-shield-alt"></i> Suspicious Activity Monitor</h2>
+        <div class="page-actions">
+            <button class="btn btn-danger">
+                <i class="fas fa-lock"></i> Lock System
+            </button>
+            <button class="btn btn-warning">
+                <i class="fas fa-bell"></i> Send Alert
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-download"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Security Status -->
+    <div class="security-status">
+        <div class="status-card">
+            <div class="status-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="status-info">
+                <h4>Security Status</h4>
+                <span class="status-badge success">Secure</span>
+                <p>Last scan: 5 minutes ago</p>
+            </div>
+        </div>
+        <div class="status-card">
+            <div class="status-icon">
+                <i class="fas fa-user-secret"></i>
+            </div>
+            <div class="status-info">
+                <h4>Active Threats</h4>
+                <span class="status-badge warning">2</span>
+                <p>Monitoring 1,234 IPs</p>
+            </div>
+        </div>
+        <div class="status-card">
+            <div class="status-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="status-info">
+                <h4>Response Time</h4>
+                <span class="status-badge info">1.2s</span>
+                <p>Average detection time</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspicious Activity Filters -->
+    <div class="filters-section">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Activity Type:</label>
+                <select class="form-select" id="activityTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="brute_force">Brute Force</option>
+                    <option value="sql_injection">SQL Injection</option>
+                    <option value="xss">XSS Attempt</option>
+                    <option value="suspicious_ip">Suspicious IP</option>
+                    <option value="unusual_traffic">Unusual Traffic</option>
+                    <option value="data_exfiltration">Data Exfiltration</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Risk Level:</label>
+                <select class="form-select" id="riskLevelFilter">
+                    <option value="">All Levels</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>IP Address:</label>
+                <input type="text" class="form-control" placeholder="IP address..." id="ipFilter">
+            </div>
+            <div class="filter-group">
+                <label>Date Range:</label>
+                <input type="date" class="form-control" id="startDate">
+                <span>to</span>
+                <input type="date" class="form-control" id="endDate">
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-outline-primary" onclick="applyFilters()">Apply</button>
+                <button class="btn btn-outline-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspicious Activity Table -->
+    <div class="table-container">
+        <table class="table table-striped table-hover" id="suspiciousActivityTable">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Activity Type</th>
+                    <th>Risk Level</th>
+                    <th>Description</th>
+                    <th>IP Address</th>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Suspicious activity entries will be loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Suspicious activity pagination" class="mt-4">
+        <ul class="pagination justify-content-center" id="suspiciousActivityPagination">
+            <!-- Pagination will be generated dynamically -->
+        </ul>
+    </nav>
+
+    <!-- Security Analytics -->
+    <div class="security-analytics">
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h4>Threats by Type</h4>
+                <canvas id="threatsByTypeChart" width="300" height="200"></canvas>
+            </div>
+            <div class="analytics-card">
+                <h4>Risk Distribution</h4>
+                <canvas id="riskDistributionChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blocked IPs -->
+    <div class="blocked-ips-container">
+        <h4><i class="fas fa-ban"></i> Recently Blocked IPs</h4>
+        <div class="blocked-ips-list" id="blockedIPsList">
+            <!-- Blocked IPs will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadSuspiciousActivity();
+    initializeSuspiciousFilters();
+    loadSecurityStats();
+    initializeThreatsChart();
+    initializeRiskChart();
+    loadBlockedIPs();
+});
+
+function loadSuspiciousActivity(page = 1) {
+    const loader = document.getElementById('adminLoader');
+    loader.style.display = 'flex';
+
+    fetch(`/api/admin/security/suspicious-activity?page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            renderSuspiciousActivityTable(data.activities);
+            renderPagination(data.pagination, 'suspiciousActivityPagination', loadSuspiciousActivity);
+            loader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error loading suspicious activity:', error);
+            showToast('Error', 'Failed to load suspicious activity', 'error');
+            loader.style.display = 'none';
+        });
+}
+
+function renderSuspiciousActivityTable(activities) {
+    const tbody = document.querySelector('#suspiciousActivityTable tbody');
+    tbody.innerHTML = '';
+
+    activities.forEach(activity => {
+        const riskClass = getRiskClass(activity.risk_level);
+        const activityIcon = getActivityIcon(activity.activity_type);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${formatDateTime(activity.timestamp)}</td>
+            <td>
+                <span class="activity-type-badge">
+                    <i class="fas fa-${activityIcon}"></i> ${activity.activity_type.replace('_', ' ')}
+                </span>
+            </td>
+            <td>
+                <span class="risk-badge ${riskClass}">
+                    ${activity.risk_level}
+                </span>
+            </td>
+            <td>
+                <span class="activity-description" title="${activity.description}">
+                    ${truncateText(activity.description, 50)}
+                </span>
+            </td>
+            <td>${activity.ip_address}</td>
+            <td>
+                ${activity.username ? `
+                <div class="user-cell">
+                    <i class="fas fa-user-circle"></i>
+                    <span>${activity.username}</span>
+                </div>
+                ` : 'Unknown'}
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewActivityDetails(${activity.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="investigateActivity(${activity.id})">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="blockIP('${activity.ip_address}')">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getRiskClass(riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+        case 'critical': return 'critical';
+        case 'high': return 'danger';
+        case 'medium': return 'warning';
+        case 'low': return 'info';
+        default: return 'secondary';
+    }
+}
+
+function getActivityIcon(activityType) {
+    switch (activityType) {
+        case 'brute_force': return 'lock';
+        case 'sql_injection': return 'database';
+        case 'xss': return 'code';
+        case 'suspicious_ip': return 'user-secret';
+        case 'unusual_traffic': return 'chart-line';
+        case 'data_exfiltration': return 'download';
+        default: return 'exclamation-triangle';
+    }
+}
+
+function loadSecurityStats() {
+    fetch('/api/admin/security/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update security status cards
+                updateSecurityStatus(data.stats);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading security stats:', error);
+        });
+}
+
+function updateSecurityStatus(stats) {
+    // Update status badges and info
+    const statusBadge = document.querySelector('.status-badge');
+    if (stats.active_threats > 5) {
+        statusBadge.className = 'status-badge danger';
+        statusBadge.textContent = 'High Risk';
+    } else if (stats.active_threats > 0) {
+        statusBadge.className = 'status-badge warning';
+        statusBadge.textContent = 'Medium Risk';
+    } else {
+        statusBadge.className = 'status-badge success';
+        statusBadge.textContent = 'Secure';
+    }
+}
+
+function initializeThreatsChart() {
+    fetch('/api/admin/security/threats-by-type')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const ctx = document.getElementById('threatsByTypeChart');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.threats.map(t => t.type.replace('_', ' ')),
+                        datasets: [{
+                            data: data.threats.map(t => t.count),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 205, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(153, 102, 255, 0.8)',
+                                'rgba(255, 159, 64, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading threats chart:', error);
+        });
+}
+
+function initializeRiskChart() {
+    fetch('/api/admin/security/risk-distribution')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const ctx = document.getElementById('riskDistributionChart');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium', 'High', 'Critical'],
+                        datasets: [{
+                            label: 'Incidents',
+                            data: [data.risk.low, data.risk.medium, data.risk.high, data.risk.critical],
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(52, 58, 64, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading risk chart:', error);
+        });
+}
+
+function loadBlockedIPs() {
+    fetch('/api/admin/security/blocked-ips')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('blockedIPsList');
+                container.innerHTML = '';
+
+                data.ips.forEach(ip => {
+                    const ipEl = document.createElement('div');
+                    ipEl.className = 'blocked-ip-item';
+                    ipEl.innerHTML = `
+                        <div class="blocked-ip-info">
+                            <span class="blocked-ip-address">${ip.ip_address}</span>
+                            <span class="blocked-ip-reason">${ip.reason}</span>
+                            <span class="blocked-ip-date">${formatDateTime(ip.blocked_at)}</span>
+                        </div>
+                        <div class="blocked-ip-actions">
+                            <button class="btn btn-sm btn-outline-success" onclick="unblockIP('${ip.ip_address}')">
+                                <i class="fas fa-unlock"></i> Unblock
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(ipEl);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading blocked IPs:', error);
+        });
+}
+
+function initializeSuspiciousFilters() {
+    const filters = ['activityTypeFilter', 'riskLevelFilter', 'ipFilter', 'startDate', 'endDate'];
+    let searchTimeout;
+
+    filters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadSuspiciousActivity();
+                }, 500);
+            });
+            element.addEventListener('change', () => loadSuspiciousActivity());
+        }
+    });
+}
+
+function applyFilters() {
+    loadSuspiciousActivity();
+}
+
+function clearFilters() {
+    document.getElementById('activityTypeFilter').value = '';
+    document.getElementById('riskLevelFilter').value = '';
+    document.getElementById('ipFilter').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    loadSuspiciousActivity();
+}
+
+function viewActivityDetails(activityId) {
+    fetch(`/api/admin/security/activity/${activityId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showActivityDetailsModal(data.activity);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading activity details:', error);
+            showToast('Error', 'Failed to load activity details', 'error');
+        });
+}
+
+function showActivityDetailsModal(activity) {
+    const modal = document.getElementById('adminModal');
+    const modalTitle = document.getElementById('adminModalLabel');
+    const modalBody = document.getElementById('adminModalBody');
+
+    modalTitle.textContent = 'Suspicious Activity Details';
+    modalBody.innerHTML = `
+        <div class="activity-details">
+            <div class="detail-row">
+                <strong>Activity Type:</strong> ${activity.activity_type.replace('_', ' ')}
+            </div>
+            <div class="detail-row">
+                <strong>Risk Level:</strong>
+                <span class="risk-badge ${getRiskClass(activity.risk_level)}">
+                    ${activity.risk_level}
+                </span>
+            </div>
+            <div class="detail-row">
+                <strong>Timestamp:</strong> ${formatDateTime(activity.timestamp)}
+            </div>
+            <div class="detail-row">
+                <strong>Description:</strong> ${activity.description}
+            </div>
+            <div class="detail-row">
+                <strong>IP Address:</strong> ${activity.ip_address}
+            </div>
+            <div class="detail-row">
+                <strong>Location:</strong> ${activity.location || 'Unknown'}
+            </div>
+            <div class="detail-row">
+                <strong>User:</strong> ${activity.username || 'Unknown'}
+            </div>
+            <div class="detail-row">
+                <strong>User Agent:</strong> ${activity.user_agent}
+            </div>
+            ${activity.additional_data ? `
+            <div class="detail-row">
+                <strong>Additional Data:</strong>
+                <pre class="additional-data">${JSON.stringify(activity.additional_data, null, 2)}</pre>
+            </div>
+            ` : ''}
+        </div>
+    `;
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+function investigateActivity(activityId) {
+    // Open investigation modal or redirect to investigation page
+    showToast('Info', 'Investigation feature coming soon', 'info');
+}
+
+function blockIP(ipAddress) {
+    if (confirm(`Are you sure you want to block IP address ${ipAddress}?`)) {
+        fetch('/api/admin/security/block-ip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ip_address: ipAddress })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Success', `IP ${ipAddress} has been blocked`, 'success');
+                loadSuspiciousActivity();
+                loadBlockedIPs();
+            } else {
+                showToast('Error', data.message || 'Failed to block IP', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error blocking IP:', error);
+            showToast('Error', 'Failed to block IP', 'error');
+        });
+    }
+}
+
+function unblockIP(ipAddress) {
+    if (confirm(`Are you sure you want to unblock IP address ${ipAddress}?`)) {
+        fetch('/api/admin/security/unblock-ip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ip_address: ipAddress })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Success', `IP ${ipAddress} has been unblocked`, 'success');
+                loadBlockedIPs();
+            } else {
+                showToast('Error', data.message || 'Failed to unblock IP', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error unblocking IP:', error);
+            showToast('Error', 'Failed to unblock IP', 'error');
+        });
+    }
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+function renderPagination(pagination, paginationId, loadFunction) {
+    const paginationEl = document.getElementById(paginationId);
+    paginationEl.innerHTML = '';
+
+    for (let i = 1; i <= pagination.total_pages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === pagination.current_page ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="${loadFunction.name}(${i})">${i}</a>`;
+        paginationEl.appendChild(li);
+    }
+}
+
+function showToast(title, message, type = 'info') {
+    const toast = document.getElementById('adminToast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+
+    toast.className = `toast toast-${type}`;
+
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="card bg-secondary text-light">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Results for: {{ book }}</h2>
+    </div>
+    <div class="card-body">
+        <h3>Official Dorks</h3>
+        <ul class="list-group mb-3">
+            {% for title, link in queries.items() %}
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center">
+                <strong>{{ title }}</strong>
+                <a href="{{ link }}" target="_blank" class="btn btn-primary btn-sm">Open</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <h3>AI Suggestions</h3>
+        <ul class="list-group">
+            {% for d in ai_dorks %}
+            <li class="list-group-item bg-dark text-light">{{ d }}</li>
+            {% endfor %}
+        </ul>
+        <div class="mt-3">
+            <a href="/export/{{book}}/txt" class="btn btn-outline-light me-2">Export TXT</a>
+            <a href="/export/{{book}}/json" class="btn btn-outline-light me-2">Export JSON</a>
+            <a href="/export/{{book}}/pdf" class="btn btn-outline-light me-2">Export PDF</a>
+            <a href="/scrape/{{book}}" class="btn btn-warning">Scrape PDFs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

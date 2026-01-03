@@ -1,0 +1,20 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card bg-secondary text-light">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Search for PDFs</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/search">
+                    <div class="mb-3">
+                        <input type="text" name="book" class="form-control" placeholder="Enter book name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

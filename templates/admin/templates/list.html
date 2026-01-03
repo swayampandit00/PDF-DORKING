@@ -1,0 +1,380 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Templates - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="templates-container">
+    <div class="page-header">
+        <h2><i class="fas fa-file-code"></i> Template Management</h2>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="createNewTemplate()">
+                <i class="fas fa-plus"></i> Create Template
+            </button>
+            <button class="btn btn-outline-secondary" onclick="refreshTemplates()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Template Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">24</div>
+                <div class="stat-label">Total Templates</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">18</div>
+                <div class="stat-label">Active Templates</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">1,247</div>
+                <div class="stat-label">Total Views</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">89</div>
+                <div class="stat-label">Downloads</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Filters -->
+    <div class="filters-section mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <select class="form-select" id="templateCategory">
+                    <option value="all">All Categories</option>
+                    <option value="email">Email Templates</option>
+                    <option value="page">Page Templates</option>
+                    <option value="component">Components</option>
+                    <option value="layout">Layouts</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="templateStatus">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="templateSearch" placeholder="Search templates...">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-outline-primary w-100" onclick="applyFilters()">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Grid -->
+    <div class="templates-grid">
+        <div class="row">
+            <!-- Email Template -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(1)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(1)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>Welcome Email</h5>
+                        <p class="template-description">Welcome email template for new user registration</p>
+                        <div class="template-meta">
+                            <span class="badge bg-primary">Email</span>
+                            <span class="badge bg-success">Active</span>
+                            <small class="text-muted">Modified: 2025-12-30</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 245 views</small>
+                            <small><i class="fas fa-download"></i> 12 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Template -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(2)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(2)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>Dashboard Layout</h5>
+                        <p class="template-description">Main dashboard layout with sidebar and navigation</p>
+                        <div class="template-meta">
+                            <span class="badge bg-info">Layout</span>
+                            <span class="badge bg-success">Active</span>
+                            <small class="text-muted">Modified: 2025-12-29</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 189 views</small>
+                            <small><i class="fas fa-download"></i> 8 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Component Template -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(3)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(3)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>Data Table Component</h5>
+                        <p class="template-description">Reusable data table component with sorting and filtering</p>
+                        <div class="template-meta">
+                            <span class="badge bg-warning">Component</span>
+                            <span class="badge bg-success">Active</span>
+                            <small class="text-muted">Modified: 2025-12-28</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 156 views</small>
+                            <small><i class="fas fa-download"></i> 23 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Reset Email -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(4)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(4)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>Password Reset</h5>
+                        <p class="template-description">Password reset email with secure token link</p>
+                        <div class="template-meta">
+                            <span class="badge bg-primary">Email</span>
+                            <span class="badge bg-success">Active</span>
+                            <small class="text-muted">Modified: 2025-12-27</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 98 views</small>
+                            <small><i class="fas fa-download"></i> 45 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Page Template -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(5)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(5)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>404 Error Page</h5>
+                        <p class="template-description">Custom 404 error page with navigation options</p>
+                        <div class="template-meta">
+                            <span class="badge bg-info">Page</span>
+                            <span class="badge bg-warning">Draft</span>
+                            <small class="text-muted">Modified: 2025-12-26</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 67 views</small>
+                            <small><i class="fas fa-download"></i> 3 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Form Component -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="template-card">
+                    <div class="template-header">
+                        <div class="template-icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTemplate(6)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(6)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="template-content">
+                        <h5>Login Form</h5>
+                        <p class="template-description">Responsive login form with validation and remember me</p>
+                        <div class="template-meta">
+                            <span class="badge bg-warning">Component</span>
+                            <span class="badge bg-success">Active</span>
+                            <small class="text-muted">Modified: 2025-12-25</small>
+                        </div>
+                        <div class="template-stats">
+                            <small><i class="fas fa-eye"></i> 312 views</small>
+                            <small><i class="fas fa-download"></i> 67 downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Editor Modal -->
+    <div class="modal fade" id="templateEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Template Editor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="templateForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateName" class="form-label">Template Name</label>
+                                    <input type="text" class="form-control" id="templateName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateCategory" class="form-label">Category</label>
+                                    <select class="form-select" id="templateCategorySelect" required>
+                                        <option value="email">Email Template</option>
+                                        <option value="page">Page Template</option>
+                                        <option value="component">Component</option>
+                                        <option value="layout">Layout</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="templateDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="templateDescription" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="templateContent" class="form-label">Template Content</label>
+                            <textarea class="form-control" id="templateContent" rows="15" placeholder="Enter HTML/CSS/JS content..."></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="templateStatusSelect">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="draft">Draft</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateTags" class="form-label">Tags</label>
+                                    <input type="text" class="form-control" id="templateTags" placeholder="Comma-separated tags">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTemplate()">Save Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions mt-4" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="selectedCount">0 templates selected</span>
+            <div>
+                <button class="btn btn-sm btn-outline-success" onclick="bulkActivate()">
+                    <i class="fas fa-check"></i> Activate
+                </button>
+                <button class="btn btn-sm btn-outline-warning" onclick="bulkDeactivate()">
+                    <i class="fas fa-pause"></i> Deactivate
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="bulkDelete()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin/assets/js/templates.js"></script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}View User - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="user-view-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h2><i class="fas fa-user"></i> User Details</h2>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="editUser()">
+                <i class="fas fa-edit"></i> Edit User
+            </button>
+            <button class="btn btn-danger" onclick="deleteUser()">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="user-profile">
+        <div class="profile-header">
+            <div class="user-avatar-large">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <h3 id="userName">John Doe</h3>
+                <p id="userEmail">john.doe@example.com</p>
+                <span class="user-status active" id="userStatus">Active</span>
+            </div>
+        </div>
+
+        <div class="profile-details">
+            <div class="detail-section">
+                <h4>Account Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>User ID:</label>
+                        <span id="userId">#12345</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Username:</label>
+                        <span id="userUsername">john_doe</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Role:</label>
+                        <span id="userRole">User</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Joined:</label>
+                        <span id="userJoined">Jan 15, 2024</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Last Login:</label>
+                        <span id="userLastLogin">2 hours ago</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>IP Address:</label>
+                        <span id="userIP">192.168.1.100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4>Activity Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalSearches">156</div>
+                        <div class="stat-label">Total Searches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="pdfsFound">42</div>
+                        <div class="stat-label">PDFs Found</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="downloads">28</div>
+                        <div class="stat-label">Downloads</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="favorites">15</div>
+                        <div class="stat-label">Favorites</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+            <h4>Recent Activity</h4>
+            <div class="activity-list" id="userActivity">
+                <!-- Activity items will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/templates/admin/users/js/users.js"></script>
+{% endblock %}

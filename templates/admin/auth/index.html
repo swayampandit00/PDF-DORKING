@@ -1,0 +1,603 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Authentication - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="page-header">
+        <h2><i class="fas fa-shield-alt"></i> Authentication Management</h2>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="refreshAuthStats()">
+                <i class="fas fa-sync"></i> Refresh Stats
+            </button>
+        </div>
+    </div>
+
+    <!-- Auth Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">1,247</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">1,189</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">58</div>
+                <div class="stat-label">Failed Logins (24h)</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">2.3h</div>
+                <div class="stat-label">Avg Session Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Tabs -->
+    <div class="auth-tabs">
+        <div class="nav nav-tabs" id="authTab" role="tablist">
+            <button class="nav-link active" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button" role="tab">
+                <i class="fas fa-clock"></i> Active Sessions
+            </button>
+            <button class="nav-link" id="login-attempts-tab" data-bs-toggle="tab" data-bs-target="#login-attempts" type="button" role="tab">
+                <i class="fas fa-sign-in-alt"></i> Login Attempts
+            </button>
+            <button class="nav-link" id="security-settings-tab" data-bs-toggle="tab" data-bs-target="#security-settings" type="button" role="tab">
+                <i class="fas fa-cog"></i> Security Settings
+            </button>
+            <button class="nav-link" id="password-policy-tab" data-bs-toggle="tab" data-bs-target="#password-policy" type="button" role="tab">
+                <i class="fas fa-key"></i> Password Policy
+            </button>
+            <button class="nav-link" id="two-factor-tab" data-bs-toggle="tab" data-bs-target="#two-factor" type="button" role="tab">
+                <i class="fas fa-mobile-alt"></i> 2FA Management
+            </button>
+        </div>
+
+        <div class="tab-content" id="authTabContent">
+            <!-- Active Sessions -->
+            <div class="tab-pane fade show active" id="sessions" role="tabpanel">
+                <div class="auth-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Active User Sessions</h4>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="refreshSessions()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="terminateAllSessions()">
+                                <i class="fas fa-times"></i> Terminate All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="sessionsTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                    <th>Login Time</th>
+                                    <th>Last Activity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/static/default-avatar.png" alt="Avatar" class="avatar-sm me-2">
+                                            <div>
+                                                <div class="fw-bold">john.doe@example.com</div>
+                                                <small class="text-muted">User ID: 12345</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>192.168.1.100</td>
+                                    <td>
+                                        <span title="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36">Chrome 120.0...</span>
+                                    </td>
+                                    <td>2025-12-30 14:30:25</td>
+                                    <td>2025-12-30 15:45:12</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="terminateSession(12345)">
+                                            <i class="fas fa-times"></i> Terminate
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/static/default-avatar.png" alt="Avatar" class="avatar-sm me-2">
+                                            <div>
+                                                <div class="fw-bold">admin@example.com</div>
+                                                <small class="text-muted">User ID: 1</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>192.168.1.50</td>
+                                    <td>
+                                        <span title="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36">Safari 17.0...</span>
+                                    </td>
+                                    <td>2025-12-30 09:15:30</td>
+                                    <td>2025-12-30 15:42:18</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="terminateSession(1)">
+                                            <i class="fas fa-times"></i> Terminate
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Session Filters -->
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="sessionFilter">
+                                    <option value="all">All Sessions</option>
+                                    <option value="active">Active Only</option>
+                                    <option value="idle">Idle > 30min</option>
+                                    <option value="admin">Admin Sessions</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control form-control-sm" id="sessionSearch" placeholder="Search users...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Attempts -->
+            <div class="tab-pane fade" id="login-attempts" role="tabpanel">
+                <div class="auth-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Login Attempts</h4>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="refreshLoginAttempts()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="clearFailedAttempts()">
+                                <i class="fas fa-trash"></i> Clear Failed
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="loginAttemptsTable">
+                            <thead>
+                                <tr>
+                                    <th>Username/Email</th>
+                                    <th>IP Address</th>
+                                    <th>Attempt Time</th>
+                                    <th>Status</th>
+                                    <th>User Agent</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>john.doe@example.com</td>
+                                    <td>192.168.1.100</td>
+                                    <td>2025-12-30 15:30:25</td>
+                                    <td><span class="badge bg-success">Success</span></td>
+                                    <td>Chrome 120.0</td>
+                                    <td>New York, US</td>
+                                </tr>
+                                <tr>
+                                    <td>unknown@example.com</td>
+                                    <td>203.0.113.45</td>
+                                    <td>2025-12-30 15:25:10</td>
+                                    <td><span class="badge bg-danger">Failed</span></td>
+                                    <td>Chrome 119.0</td>
+                                    <td>Unknown</td>
+                                </tr>
+                                <tr>
+                                    <td>admin@example.com</td>
+                                    <td>192.168.1.50</td>
+                                    <td>2025-12-30 15:20:45</td>
+                                    <td><span class="badge bg-success">Success</span></td>
+                                    <td>Safari 17.0</td>
+                                    <td>San Francisco, US</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Login Stats -->
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-success">1,247</h5>
+                                    <p class="card-text">Successful Logins (24h)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-danger">58</h5>
+                                    <p class="card-text">Failed Attempts (24h)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-warning">12</h5>
+                                    <p class="card-text">Suspicious IPs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-info">3</h5>
+                                    <p class="card-text">Blocked IPs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="tab-pane fade" id="security-settings" role="tabpanel">
+                <div class="auth-section">
+                    <h4>Security Configuration</h4>
+                    <form id="securitySettingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="maxLoginAttempts" class="form-label">Max Login Attempts</label>
+                                    <input type="number" class="form-control" id="maxLoginAttempts" value="5" min="1" max="20">
+                                    <div class="form-text">Number of failed attempts before account lockout</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lockoutDuration" class="form-label">Lockout Duration (minutes)</label>
+                                    <input type="number" class="form-control" id="lockoutDuration" value="30" min="5" max="1440">
+                                    <div class="form-text">How long to lock account after failed attempts</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                    <input type="number" class="form-control" id="sessionTimeout" value="480" min="30" max="1440">
+                                    <div class="form-text">Auto-logout after inactivity</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="passwordExpiry" class="form-label">Password Expiry (days)</label>
+                                    <input type="number" class="form-control" id="passwordExpiry" value="90" min="0" max="365">
+                                    <div class="form-text">0 = never expires</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requireStrongPasswords" checked>
+                                <label class="form-check-label" for="requireStrongPasswords">
+                                    Require Strong Passwords
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enableCaptcha" checked>
+                                <label class="form-check-label" for="enableCaptcha">
+                                    Enable CAPTCHA on Login
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enableIpBlocking">
+                                <label class="form-check-label" for="enableIpBlocking">
+                                    Enable IP Blocking
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="logSecurityEvents" checked>
+                                <label class="form-check-label" for="logSecurityEvents">
+                                    Log Security Events
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="allowedCountries" class="form-label">Allowed Countries (ISO codes, comma-separated)</label>
+                            <input type="text" class="form-control" id="allowedCountries" value="US,CA,GB,AU" placeholder="US,CA,GB,AU">
+                            <div class="form-text">Leave empty to allow all countries</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Security Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Password Policy -->
+            <div class="tab-pane fade" id="password-policy" role="tabpanel">
+                <div class="auth-section">
+                    <h4>Password Policy Configuration</h4>
+                    <form id="passwordPolicyForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="minPasswordLength" class="form-label">Minimum Password Length</label>
+                                    <input type="number" class="form-control" id="minPasswordLength" value="8" min="6" max="32">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="passwordHistory" class="form-label">Password History (count)</label>
+                                    <input type="number" class="form-control" id="passwordHistory" value="5" min="0" max="20">
+                                    <div class="form-text">Number of previous passwords to remember (0 = disabled)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password Requirements</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requireUppercase" checked>
+                                        <label class="form-check-label" for="requireUppercase">Require uppercase letters</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requireLowercase" checked>
+                                        <label class="form-check-label" for="requireLowercase">Require lowercase letters</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requireNumbers" checked>
+                                        <label class="form-check-label" for="requireNumbers">Require numbers</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requireSpecialChars" checked>
+                                        <label class="form-check-label" for="requireSpecialChars">Require special characters</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="preventCommonPasswords" checked>
+                                        <label class="form-check-label" for="preventCommonPasswords">Prevent common passwords</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="preventDictionaryWords">
+                                        <label class="form-check-label" for="preventDictionaryWords">Prevent dictionary words</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="passwordExpiryDays" class="form-label">Password Expiry (days)</label>
+                            <input type="number" class="form-control" id="passwordExpiryDays" value="90" min="0" max="365">
+                            <div class="form-text">0 = passwords never expire</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="passwordExpiryWarning" class="form-label">Expiry Warning (days before)</label>
+                            <input type="number" class="form-control" id="passwordExpiryWarning" value="7" min="0" max="30">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="allowPasswordReset" checked>
+                                <label class="form-check-label" for="allowPasswordReset">Allow password reset via email</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requirePasswordChange" checked>
+                                <label class="form-check-label" for="requirePasswordChange">Require password change on first login</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Password Policy
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2FA Management -->
+            <div class="tab-pane fade" id="two-factor" role="tabpanel">
+                <div class="auth-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Two-Factor Authentication</h4>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="enable2FAForAll()">
+                                <i class="fas fa-plus"></i> Enable for All
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="disable2FAForAll()">
+                                <i class="fas fa-minus"></i> Disable for All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2FA Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-success">847</h5>
+                                    <p class="card-text">Users with 2FA Enabled</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-warning">400</h5>
+                                    <p class="card-text">Users without 2FA</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-info">98.5%</h5>
+                                    <p class="card-text">2FA Success Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2FA Settings -->
+                    <form id="twoFactorSettingsForm" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="twoFactorMethod" class="form-label">Default 2FA Method</label>
+                                    <select class="form-select" id="twoFactorMethod">
+                                        <option value="app">Authenticator App</option>
+                                        <option value="sms">SMS</option>
+                                        <option value="email">Email</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="backupCodesCount" class="form-label">Backup Codes Count</label>
+                                    <input type="number" class="form-control" id="backupCodesCount" value="10" min="5" max="20">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="require2FAForAdmins" checked>
+                                <label class="form-check-label" for="require2FAForAdmins">Require 2FA for Administrators</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="allowBackupCodes" checked>
+                                <label class="form-check-label" for="allowBackupCodes">Allow Backup Codes</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberDevices" checked>
+                                <label class="form-check-label" for="rememberDevices">Remember Trusted Devices</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save 2FA Settings
+                        </button>
+                    </form>
+
+                    <!-- User 2FA Status -->
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="twoFactorUsersTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>2FA Status</th>
+                                    <th>Method</th>
+                                    <th>Setup Date</th>
+                                    <th>Last Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/static/default-avatar.png" alt="Avatar" class="avatar-sm me-2">
+                                            <div>
+                                                <div class="fw-bold">admin@example.com</div>
+                                                <small class="text-muted">Administrator</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Enabled</span></td>
+                                    <td>Authenticator App</td>
+                                    <td>2025-01-15</td>
+                                    <td>2025-12-30 15:42</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="disable2FA(1)">
+                                            <i class="fas fa-times"></i> Disable
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/static/default-avatar.png" alt="Avatar" class="avatar-sm me-2">
+                                            <div>
+                                                <div class="fw-bold">john.doe@example.com</div>
+                                                <small class="text-muted">User</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning">Not Set Up</span></td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="setup2FA(12345)">
+                                            <i class="fas fa-plus"></i> Setup
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin/assets/js/auth-functions.js"></script>
+{% endblock %}

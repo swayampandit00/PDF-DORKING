@@ -1,0 +1,109 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Edit User - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="user-edit-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h2><i class="fas fa-edit"></i> Edit User</h2>
+        </div>
+    </div>
+
+    <div class="edit-form-container">
+        <form id="editUserForm" class="edit-form">
+            <div class="form-section">
+                <h4>Basic Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Account Settings</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="premium">Premium</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="banned">Banned</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">New Password (leave blank to keep current)</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Preferences</h4>
+                <div class="form-checks">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="emailNotifications" name="emailNotifications">
+                        <label class="form-check-label" for="emailNotifications">
+                            Email notifications
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="darkMode" name="darkMode">
+                        <label class="form-check-label" for="darkMode">
+                            Dark mode
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="autoDownload" name="autoDownload">
+                        <label class="form-check-label" for="autoDownload">
+                            Auto download PDFs
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/templates/admin/users/js/users.js"></script>
+{% endblock %}

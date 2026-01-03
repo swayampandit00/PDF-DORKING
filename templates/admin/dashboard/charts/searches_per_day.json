@@ -1,0 +1,11 @@
+{
+    "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "data": [120, 150, 180, 200, 170, 140, 160],
+    "datasets": [{
+        "label": "Searches per Day",
+        "data": [120, 150, 180, 200, 170, 140, 160],
+        "borderColor": "rgb(75, 192, 192)",
+        "backgroundColor": "rgba(75, 192, 192, 0.2)",
+        "tension": 0.1
+    }]
+}

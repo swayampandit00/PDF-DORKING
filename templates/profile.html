@@ -1,0 +1,35 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card bg-secondary text-light">
+            <div class="card-header">
+                <h2 class="card-title mb-0">User Profile & Preferences</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="theme" class="form-label">Theme</label>
+                        <select class="form-select" id="theme" name="theme">
+                            <option value="dark" {% if theme == 'dark' %}selected{% endif %}>Dark</option>
+                            <option value="light" {% if theme == 'light' %}selected{% endif %}>Light</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lang" class="form-label">Language</label>
+                        <select class="form-select" id="lang" name="lang">
+                            <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+                            <option value="hi" {% if lang == 'hi' %}selected{% endif %}>हिंदी</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Preferences</button>
+                </form>
+                <hr>
+                <h5>Account Information</h5>
+                <p><strong>Email:</strong> {{ session['user'] }}</p>
+                <p><strong>Member Since:</strong> December 2025</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

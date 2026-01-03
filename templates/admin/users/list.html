@@ -1,0 +1,78 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Users Management - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="users-container">
+    <div class="page-header">
+        <h2><i class="fas fa-users"></i> Users Management</h2>
+        <div class="page-actions">
+            <button class="btn btn-success" onclick="showAddUserModal()">
+                <i class="fas fa-plus"></i> Add User
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <div class="search-box">
+            <input type="text" class="form-control" placeholder="Search users..." id="userSearch">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="filter-buttons">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="banned">Banned</option>
+            </select>
+            <select class="form-select" id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+                <option value="premium">Premium</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container">
+        <table class="table table-striped table-hover" id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                    <th>Searches</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Users will be loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Users pagination" class="mt-4">
+        <ul class="pagination justify-content-center" id="usersPagination">
+            <!-- Pagination will be generated dynamically -->
+        </ul>
+    </nav>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% include 'admin/layout/components/loader.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/templates/admin/users/js/users.js"></script>
+{% endblock %}

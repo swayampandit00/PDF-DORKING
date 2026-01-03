@@ -1,0 +1,431 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}AI Tools - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="ai-tools-container">
+    <div class="page-header">
+        <h2><i class="fas fa-robot"></i> AI Tools</h2>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="refreshAIAnalytics()">
+                <i class="fas fa-sync"></i> Refresh Analytics
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Usage Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="ai-stat-requests">1,247</div>
+                <div class="stat-label">AI Requests Today</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="ai-stat-avg-response">2.3s</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="ai-stat-success-rate">98.5%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="ai-stat-cost">$12.47</div>
+                <div class="stat-label">Monthly Cost</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tools Tabs -->
+    <div class="ai-tools-tabs">
+        <div class="nav nav-tabs" id="aiToolsTab" role="tablist">
+            <button class="nav-link active" id="dork-generator-tab" data-bs-toggle="tab" data-bs-target="#dork-generator" type="button" role="tab">
+                <i class="fas fa-search"></i> Dork Generator
+            </button>
+            <button class="nav-link" id="content-analyzer-tab" data-bs-toggle="tab" data-bs-target="#content-analyzer" type="button" role="tab">
+                <i class="fas fa-file-alt"></i> Content Analyzer
+            </button>
+            <button class="nav-link" id="search-optimizer-tab" data-bs-toggle="tab" data-bs-target="#search-optimizer" type="button" role="tab">
+                <i class="fas fa-rocket"></i> Search Optimizer
+            </button>
+            <button class="nav-link" id="report-generator-tab" data-bs-toggle="tab" data-bs-target="#report-generator" type="button" role="tab">
+                <i class="fas fa-chart-bar"></i> Report Generator
+            </button>
+            <button class="nav-link" id="ai-settings-tab" data-bs-toggle="tab" data-bs-target="#ai-settings" type="button" role="tab">
+                <i class="fas fa-cog"></i> AI Settings
+            </button>
+        </div>
+
+        <div class="tab-content" id="aiToolsTabContent">
+            <!-- Dork Generator -->
+            <div class="tab-pane fade show active" id="dork-generator" role="tabpanel">
+                <div class="ai-tool-section">
+                    <h4>AI-Powered Dork Generator</h4>
+                    <form class="ai-tool-form mb-4" data-tool="dork-generator">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dorkTarget" class="form-label">Target</label>
+                                    <input type="text" class="form-control" id="dorkTarget" name="target" placeholder="e.g., example.com" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dorkKeywords" class="form-label">Keywords</label>
+                                    <input type="text" class="form-control" id="dorkKeywords" name="keywords" placeholder="e.g., admin, login, config">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File Types</label>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="pdf" id="pdfType" name="filetypes[]" checked>
+                                        <label class="form-check-label" for="pdfType">PDF</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="doc" id="docType" name="filetypes[]">
+                                        <label class="form-check-label" for="docType">DOC</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="xls" id="xlsType" name="filetypes[]">
+                                        <label class="form-check-label" for="xlsType">XLS</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="txt" id="txtType" name="filetypes[]">
+                                        <label class="form-check-label" for="txtType">TXT</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="dorkComplexity" class="form-label">Complexity</label>
+                                    <select class="form-select" id="dorkComplexity" name="complexity">
+                                        <option value="basic">Basic</option>
+                                        <option value="intermediate" selected>Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="dorkDateRange" class="form-label">Date Range</label>
+                                    <select class="form-select" id="dorkDateRange" name="dateRange">
+                                        <option value="any">Any Time</option>
+                                        <option value="day">Past 24 hours</option>
+                                        <option value="week">Past Week</option>
+                                        <option value="month">Past Month</option>
+                                        <option value="year">Past Year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="autoGenerate" name="autoGenerate" checked>
+                                        <label class="form-check-label" for="autoGenerate">Auto Generate</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="generateDorkBtn">
+                            <i class="fas fa-magic"></i> Generate Dorks
+                        </button>
+                    </form>
+
+                    <div id="dorkResults" class="ai-results-container">
+                        <!-- Generated dorks will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Analyzer -->
+            <div class="tab-pane fade" id="content-analyzer" role="tabpanel">
+                <div class="ai-tool-section">
+                    <h4>AI Content Analyzer</h4>
+                    <form class="ai-tool-form mb-4" data-tool="content-analyzer">
+                        <div class="mb-3">
+                            <label for="contentUrl" class="form-label">URL to Analyze</label>
+                            <input type="url" class="form-control" id="contentUrl" name="url" placeholder="https://example.com/page">
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentText" class="form-label">Or Paste Content</label>
+                            <textarea class="form-control" id="contentText" name="content" rows="5" placeholder="Paste text content here..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contentFile" class="form-label">Or Upload File</label>
+                            <input type="file" class="form-control" id="contentFile" name="file" accept=".txt,.pdf,.doc,.docx">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Analysis Types</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="sentiment" id="sentimentAnalysis" name="analysisType[]" checked>
+                                        <label class="form-check-label" for="sentimentAnalysis">Sentiment</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="keywords" id="keywordAnalysis" name="analysisType[]" checked>
+                                        <label class="form-check-label" for="keywordAnalysis">Keywords</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="topics" id="topicAnalysis" name="analysisType[]">
+                                        <label class="form-check-label" for="topicAnalysis">Topics</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="summary" id="summaryAnalysis" name="analysisType[]">
+                                        <label class="form-check-label" for="summaryAnalysis">Summary</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoAnalyze" name="autoAnalyze">
+                                <label class="form-check-label" for="autoAnalyze">Auto Analyze on URL Change</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="analyzeContentBtn">
+                            <i class="fas fa-search"></i> Analyze Content
+                        </button>
+                    </form>
+
+                    <div id="analysisResults" class="ai-results-container">
+                        <!-- Analysis results will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Optimizer -->
+            <div class="tab-pane fade" id="search-optimizer" role="tabpanel">
+                <div class="ai-tool-section">
+                    <h4>AI Search Optimizer</h4>
+                    <form class="ai-tool-form mb-4" data-tool="search-optimizer">
+                        <div class="mb-3">
+                            <label for="searchQuery" class="form-label">Search Query</label>
+                            <input type="text" class="form-control" id="searchQuery" name="query" placeholder="Enter your search query..." required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="searchTarget" class="form-label">Target Site/Domain</label>
+                            <input type="text" class="form-control" id="searchTarget" name="target" placeholder="e.g., example.com or leave empty for general search">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Optimization Goals</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="relevance" id="goalRelevance" name="optimizationGoals[]" checked>
+                                        <label class="form-check-label" for="goalRelevance">Improve Relevance</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="specificity" id="goalSpecificity" name="optimizationGoals[]">
+                                        <label class="form-check-label" for="goalSpecificity">Increase Specificity</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="comprehensiveness" id="goalComprehensiveness" name="optimizationGoals[]">
+                                        <label class="form-check-label" for="goalComprehensiveness">Broader Coverage</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="optimizeSearchBtn">
+                            <i class="fas fa-rocket"></i> Optimize Search
+                        </button>
+                    </form>
+
+                    <div id="quickSuggestions" class="mb-3">
+                        <!-- Quick suggestions will appear here -->
+                    </div>
+
+                    <div id="optimizationSuggestions" class="ai-results-container">
+                        <!-- Optimization suggestions will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generator -->
+            <div class="tab-pane fade" id="report-generator" role="tabpanel">
+                <div class="ai-tool-section">
+                    <h4>AI Report Generator</h4>
+                    <form class="ai-tool-form mb-4" data-tool="report-generator">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reportType" class="form-label">Report Type</label>
+                                    <select class="form-select" id="reportType" name="reportType">
+                                        <option value="usage">Usage Report</option>
+                                        <option value="performance">Performance Report</option>
+                                        <option value="security">Security Report</option>
+                                        <option value="custom">Custom Report</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reportFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="reportFormat" name="format">
+                                        <option value="pdf">PDF</option>
+                                        <option value="html">HTML</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeCharts" name="includeCharts" checked>
+                                <label class="form-check-label" for="includeCharts">Include Charts and Graphs</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="generateReportBtn">
+                            <i class="fas fa-file-pdf"></i> Generate Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- AI Settings -->
+            <div class="tab-pane fade" id="ai-settings" role="tabpanel">
+                <div class="ai-tool-section">
+                    <h4>AI Configuration</h4>
+                    <form class="settings-form" data-form-type="ai">
+                        <div class="mb-3">
+                            <label for="aiProvider" class="form-label">AI Provider</label>
+                            <select class="form-select" id="aiProvider" name="aiProvider">
+                                <option value="openai">OpenAI</option>
+                                <option value="claude">Claude (Anthropic)</option>
+                                <option value="gemini">Gemini (Google)</option>
+                            </select>
+                        </div>
+
+                        <div id="openaiSettings">
+                            <h5>OpenAI Settings</h5>
+                            <div class="mb-3">
+                                <label for="openaiApiKey" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="openaiApiKey" name="openaiApiKey" placeholder="sk-...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="openaiModel" class="form-label">Model</label>
+                                <select class="form-select" id="openaiModel" name="openaiModel">
+                                    <option value="gpt-4">GPT-4</option>
+                                    <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="claudeSettings" style="display: none;">
+                            <h5>Claude Settings</h5>
+                            <div class="mb-3">
+                                <label for="claudeApiKey" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="claudeApiKey" name="claudeApiKey">
+                            </div>
+                            <div class="mb-3">
+                                <label for="claudeModel" class="form-label">Model</label>
+                                <select class="form-select" id="claudeModel" name="claudeModel">
+                                    <option value="claude-3-opus">Claude 3 Opus</option>
+                                    <option value="claude-3-sonnet" selected>Claude 3 Sonnet</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="geminiSettings" style="display: none;">
+                            <h5>Gemini Settings</h5>
+                            <div class="mb-3">
+                                <label for="geminiApiKey" class="form-label">API Key</label>
+                                <input type="password" class="form-control" id="geminiApiKey" name="geminiApiKey">
+                            </div>
+                            <div class="mb-3">
+                                <label for="geminiModel" class="form-label">Model</label>
+                                <select class="form-select" id="geminiModel" name="geminiModel">
+                                    <option value="gemini-pro" selected>Gemini Pro</option>
+                                    <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="aiTemperature" class="form-label">Temperature (Creativity)</label>
+                            <input type="range" class="form-range" id="aiTemperature" name="aiTemperature" min="0" max="2" step="0.1" value="0.7">
+                            <div class="form-text">Current: <span id="tempValue">0.7</span></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="aiMaxTokens" class="form-label">Max Tokens</label>
+                            <input type="number" class="form-control" id="aiMaxTokens" name="aiMaxTokens" value="2000" min="100" max="4000">
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" id="testAIConnection">
+                                <i class="fas fa-plug"></i> Test AI Connection
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Usage Chart -->
+    <div class="mt-4">
+        <h4>AI Usage Analytics</h4>
+        <canvas id="aiUsageChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin/assets/js/ai-tools.js"></script>
+{% endblock %}

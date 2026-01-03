@@ -1,0 +1,11 @@
+{
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "data": [100, 150, 200, 280, 350, 420],
+    "datasets": [{
+        "label": "User Growth",
+        "data": [100, 150, 200, 280, 350, 420],
+        "borderColor": "rgb(255, 99, 132)",
+        "backgroundColor": "rgba(255, 99, 132, 0.2)",
+        "tension": 0.1
+    }]
+}

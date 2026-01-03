@@ -1,0 +1,568 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Exports - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="exports-container">
+    <div class="page-header">
+        <h2><i class="fas fa-download"></i> Data Exports</h2>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="refreshExportHistory()">
+                <i class="fas fa-sync"></i> Refresh History
+            </button>
+        </div>
+    </div>
+
+    <!-- Export Stats -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-export"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">247</div>
+                <div class="stat-label">Total Exports</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">2.3 GB</div>
+                <div class="stat-label">Data Exported</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">98.5%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-calendar"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">15</div>
+                <div class="stat-label">This Month</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Tabs -->
+    <div class="export-tabs">
+        <div class="nav nav-tabs" id="exportTab" role="tablist">
+            <button class="nav-link active" id="data-export-tab" data-bs-toggle="tab" data-bs-target="#data-export" type="button" role="tab">
+                <i class="fas fa-database"></i> Data Export
+            </button>
+            <button class="nav-link" id="report-export-tab" data-bs-toggle="tab" data-bs-target="#report-export" type="button" role="tab">
+                <i class="fas fa-chart-bar"></i> Report Export
+            </button>
+            <button class="nav-link" id="user-export-tab" data-bs-toggle="tab" data-bs-target="#user-export" type="button" role="tab">
+                <i class="fas fa-users"></i> User Export
+            </button>
+            <button class="nav-link" id="log-export-tab" data-bs-toggle="tab" data-bs-target="#log-export" type="button" role="tab">
+                <i class="fas fa-file-alt"></i> Log Export
+            </button>
+            <button class="nav-link" id="bulk-export-tab" data-bs-toggle="tab" data-bs-target="#bulk-export" type="button" role="tab">
+                <i class="fas fa-layer-group"></i> Bulk Export
+            </button>
+        </div>
+
+        <div class="tab-content" id="exportTabContent">
+            <!-- Data Export -->
+            <div class="tab-pane fade show active" id="data-export" role="tabpanel">
+                <div class="export-section">
+                    <h4>Database Export</h4>
+                    <form class="export-form mb-4" data-export-type="data">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="exportDataType" class="form-label">Export Type</label>
+                                    <select class="form-select" id="exportDataType" name="dataType">
+                                        <option value="table">Single Table</option>
+                                        <option value="query">Custom Query</option>
+                                        <option value="full">Full Database</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="exportTable" class="form-label">Table</label>
+                                    <select class="form-select" id="exportTable" name="table">
+                                        <option value="">Select Table...</option>
+                                        <option value="users">Users</option>
+                                        <option value="history">Search History</option>
+                                        <option value="pdfs">Indexed PDFs</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="exportFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="exportFormat" name="format">
+                                        <option value="csv">CSV</option>
+                                        <option value="json">JSON</option>
+                                        <option value="xml">XML</option>
+                                        <option value="sql">SQL</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tableSelector" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Select Columns</label>
+                                <div id="tableColumns" class="border p-3 rounded">
+                                    <!-- Column checkboxes will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="customQuery" style="display: none;">
+                            <div class="mb-3">
+                                <label for="exportQuery" class="form-label">Custom SQL Query</label>
+                                <textarea class="form-control" id="exportQuery" name="query" rows="4" placeholder="SELECT * FROM users WHERE created_at > '2025-01-01'"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exportFilters" class="form-label">Filters</label>
+                            <textarea class="form-control" id="exportFilters" name="conditions" rows="2" placeholder="Optional WHERE conditions..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="exportDataBtn">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Report Export -->
+            <div class="tab-pane fade" id="report-export" role="tabpanel">
+                <div class="export-section">
+                    <h4>Report Export</h4>
+                    <form class="export-form mb-4" data-export-type="report">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reportType" class="form-label">Report Type</label>
+                                    <select class="form-select" id="reportType" name="reportType">
+                                        <option value="usage">Usage Report</option>
+                                        <option value="activity">Activity Report</option>
+                                        <option value="performance">Performance Report</option>
+                                        <option value="security">Security Report</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reportFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="reportFormat" name="format">
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="reportDateRange">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="reportStartDate" class="form-label">Start Date</label>
+                                        <input type="date" class="form-control" id="reportStartDate" name="startDate">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="reportEndDate" class="form-label">End Date</label>
+                                        <input type="date" class="form-control" id="reportEndDate" name="endDate">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeCharts" name="includeCharts" checked>
+                                <label class="form-check-label" for="includeCharts">Include Charts</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Filters</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="detailed" id="detailedReport" name="filters[]">
+                                        <label class="form-check-label" for="detailedReport">Detailed View</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="anonymized" id="anonymizedReport" name="filters[]">
+                                        <label class="form-check-label" for="anonymizedReport">Anonymized Data</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="exportReportBtn">
+                            <i class="fas fa-file-pdf"></i> Export Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- User Export -->
+            <div class="tab-pane fade" id="user-export" role="tabpanel">
+                <div class="export-section">
+                    <h4>User Data Export</h4>
+                    <form class="export-form mb-4" data-export-type="users">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="userType" class="form-label">User Type</label>
+                                    <select class="form-select" id="userType" name="userType">
+                                        <option value="all">All Users</option>
+                                        <option value="active">Active Users</option>
+                                        <option value="inactive">Inactive Users</option>
+                                        <option value="admin">Administrators</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="userStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="userStatus" name="status">
+                                        <option value="all">All Status</option>
+                                        <option value="verified">Verified</option>
+                                        <option value="unverified">Unverified</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="userFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="userFormat" name="format">
+                                        <option value="csv">CSV</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userStartDate" class="form-label">Registration Start Date</label>
+                                    <input type="date" class="form-control" id="userStartDate" name="startDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userEndDate" class="form-label">Registration End Date</label>
+                                    <input type="date" class="form-control" id="userEndDate" name="endDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Include Fields</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="profile" id="includeProfile" name="fields[]" checked>
+                                        <label class="form-check-label" for="includeProfile">Profile Data</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="activity" id="includeActivity" name="fields[]">
+                                        <label class="form-check-label" for="includeActivity">Activity Log</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="preferences" id="includePreferences" name="fields[]">
+                                        <label class="form-check-label" for="includePreferences">Preferences</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="stats" id="includeStats" name="fields[]">
+                                        <label class="form-check-label" for="includeStats">Usage Stats</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeProfileData" name="includeProfileData">
+                                <label class="form-check-label" for="includeProfileData">Include Detailed Profile Information</label>
+                            </div>
+                        </div>
+
+                        <div id="userExportPreview" class="alert alert-info">
+                            <strong>Preview:</strong> 0 users will be exported
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="exportUsersBtn">
+                            <i class="fas fa-users"></i> Export Users
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Log Export -->
+            <div class="tab-pane fade" id="log-export" role="tabpanel">
+                <div class="export-section">
+                    <h4>System Logs Export</h4>
+                    <form class="export-form mb-4" data-export-type="logs">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="logType" class="form-label">Log Type</label>
+                                    <select class="form-select" id="logType" name="logType">
+                                        <option value="all">All Logs</option>
+                                        <option value="error">Error Logs</option>
+                                        <option value="access">Access Logs</option>
+                                        <option value="security">Security Logs</option>
+                                        <option value="custom">Custom Filter</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="logLevel" class="form-label">Log Level</label>
+                                    <select class="form-select" id="logLevel" name="level">
+                                        <option value="all">All Levels</option>
+                                        <option value="debug">Debug</option>
+                                        <option value="info">Info</option>
+                                        <option value="warning">Warning</option>
+                                        <option value="error">Error</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="logFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="logFormat" name="format">
+                                        <option value="txt">Text</option>
+                                        <option value="csv">CSV</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="logStartDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="logStartDate" name="startDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="logEndDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="logEndDate" name="endDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="logFilters" style="display: none;">
+                            <div class="mb-3">
+                                <label for="logSource" class="form-label">Source</label>
+                                <input type="text" class="form-control" id="logSource" name="source" placeholder="e.g., web, api, admin">
+                            </div>
+                            <div class="mb-3">
+                                <label for="logCustomFilter" class="form-label">Custom Filter</label>
+                                <textarea class="form-control" id="logCustomFilter" name="filters" rows="3" placeholder="Additional filter criteria..."></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="exportLogsBtn">
+                            <i class="fas fa-file-alt"></i> Export Logs
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bulk Export -->
+            <div class="tab-pane fade" id="bulk-export" role="tabpanel">
+                <div class="export-section">
+                    <h4>Bulk Data Export</h4>
+                    <form class="export-form mb-4" data-export-type="bulk">
+                        <div class="mb-3">
+                            <label for="bulkExportType" class="form-label">Export Type</label>
+                            <select class="form-select" id="bulkExportType" name="exportType">
+                                <option value="complete">Complete System Backup</option>
+                                <option value="selective">Selective Export</option>
+                                <option value="archival">Archival Export</option>
+                            </select>
+                        </div>
+
+                        <div id="bulkExportOptions">
+                            <div class="bulk-option" data-type="complete">
+                                <h5>Complete System Backup</h5>
+                                <p>Exports all data including users, content, logs, and configurations.</p>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeSystemData" name="items[]" value="system" checked>
+                                        <label class="form-check-label" for="includeSystemData">Include System Data</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bulk-option" data-type="selective" style="display: none;">
+                                <h5>Selective Export</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="exportUsers" name="items[]" value="users" checked>
+                                            <label class="form-check-label" for="exportUsers">Users</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="exportContent" name="items[]" value="content">
+                                            <label class="form-check-label" for="exportContent">Content</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="exportLogs" name="items[]" value="logs">
+                                            <label class="form-check-label" for="exportLogs">Logs</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="exportAnalytics" name="items[]" value="analytics">
+                                            <label class="form-check-label" for="exportAnalytics">Analytics</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bulk-option" data-type="archival" style="display: none;">
+                                <h5>Archival Export</h5>
+                                <p>Exports data older than specified date for archival purposes.</p>
+                                <div class="mb-3">
+                                    <label for="archivalDate" class="form-label">Archive Data Before</label>
+                                    <input type="date" class="form-control" id="archivalDate" name="archivalDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bulkFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="bulkFormat" name="format">
+                                        <option value="zip">ZIP Archive</option>
+                                        <option value="tar">TAR Archive</option>
+                                        <option value="7z">7-Zip Archive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compressionLevel" class="form-label">Compression</label>
+                                    <select class="form-select" id="compressionLevel" name="compression">
+                                        <option value="fast">Fast</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="maximum">Maximum</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeMetadata" name="includeMetadata" checked>
+                                <label class="form-check-label" for="includeMetadata">Include Metadata</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="splitFiles" name="splitFiles">
+                                <label class="form-check-label" for="splitFiles">Split Large Files</label>
+                            </div>
+                        </div>
+
+                        <div id="bulkExportProgress" class="mb-3" style="display: none;">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text mt-2">Preparing export...</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="startBulkExportBtn">
+                            <i class="fas fa-play"></i> Start Bulk Export
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export History -->
+    <div class="mt-4">
+        <h4>Export History</h4>
+        <div class="table-responsive">
+            <table class="table table-striped" id="exportHistoryTable">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Format</th>
+                        <th>Size</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>users_export_2025-12-30.csv</td>
+                        <td>User Data</td>
+                        <td>CSV</td>
+                        <td>45.2 KB</td>
+                        <td>2025-12-30 14:30</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary">Download</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>system_backup_2025-12-29.zip</td>
+                        <td>System Backup</td>
+                        <td>ZIP</td>
+                        <td>1.2 GB</td>
+                        <td>2025-12-29 02:00</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary">Download</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin/assets/js/export-functions.js"></script>
+{% endblock %}

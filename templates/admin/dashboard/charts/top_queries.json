@@ -1,0 +1,12 @@
+{
+    "queries": [
+        {"query": "machine learning pdf", "count": 245},
+        {"query": "python tutorial pdf", "count": 189},
+        {"query": "data science pdf", "count": 156},
+        {"query": "artificial intelligence pdf", "count": 134},
+        {"query": "deep learning pdf", "count": 98},
+        {"query": "statistics pdf", "count": 87},
+        {"query": "computer science pdf", "count": 76},
+        {"query": "mathematics pdf", "count": 65}
+    ]
+}

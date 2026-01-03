@@ -1,0 +1,371 @@
+{% extends "admin/layout/admin_base.html" %}
+
+{% block title %}Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="page-header">
+        <h2><i class="fas fa-cog"></i> System Settings</h2>
+        <div class="page-actions">
+            <button class="btn btn-success" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i> Save All Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="settings-tabs">
+        <div class="nav nav-tabs" id="settingsTab" role="tablist">
+            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                <i class="fas fa-globe"></i> General
+            </button>
+            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                <i class="fas fa-shield-alt"></i> Security
+            </button>
+            <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+            <button class="nav-link" id="api-tab" data-bs-toggle="tab" data-bs-target="#api" type="button" role="tab">
+                <i class="fas fa-code"></i> API
+            </button>
+            <button class="nav-link" id="backup-tab" data-bs-toggle="tab" data-bs-target="#backup" type="button" role="tab">
+                <i class="fas fa-database"></i> Backup
+            </button>
+            <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">
+                <i class="fas fa-tools"></i> Maintenance
+            </button>
+        </div>
+
+        <div class="tab-content" id="settingsTabContent">
+            <!-- General Settings -->
+            <div class="tab-pane fade show active" id="general" role="tabpanel">
+                <div class="settings-section">
+                    <h4>Site Configuration</h4>
+                    <form class="settings-form" data-form-type="general">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="siteName" class="form-label">Site Name</label>
+                                    <input type="text" class="form-control" id="siteName" name="siteName" value="PDF Finder Pro">
+                                    <div class="form-text" id="siteNameCounter">100 characters remaining</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="siteTheme" class="form-label">Default Theme</label>
+                                    <select class="form-select" id="siteTheme" name="siteTheme">
+                                        <option value="light">Light</option>
+                                        <option value="dark" selected>Dark</option>
+                                        <option value="auto">Auto</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="siteLogo" class="form-label">Site Logo</label>
+                            <input type="file" class="form-control" id="siteLogo" accept="image/*">
+                            <div class="mt-2">
+                                <img id="logoPreview" src="/static/logo.png" alt="Logo Preview" style="max-height: 50px; display: none;">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="siteDescription" class="form-label">Site Description</label>
+                            <textarea class="form-control" id="siteDescription" name="siteDescription" rows="3">Advanced PDF search and discovery tool</textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="tab-pane fade" id="security" role="tabpanel">
+                <div class="settings-section">
+                    <h4>Security Configuration</h4>
+                    <form class="settings-form" data-form-type="security">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="maxLoginAttempts" class="form-label">Max Login Attempts</label>
+                                    <input type="number" class="form-control" id="maxLoginAttempts" name="maxLoginAttempts" value="5" min="1" max="20">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lockoutDuration" class="form-label">Lockout Duration (minutes)</label>
+                                    <input type="number" class="form-control" id="lockoutDuration" name="lockoutDuration" value="30" min="5" max="1440">
+                                    <div class="form-text" id="lockoutDisplay">30 minutes</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enable2FA" name="enable2FA">
+                                <label class="form-check-label" for="enable2FA">
+                                    Enable Two-Factor Authentication
+                                </label>
+                            </div>
+                        </div>
+                        <div id="twoFactorSettings" style="display: none;">
+                            <div class="mb-3">
+                                <label for="twoFactorProvider" class="form-label">2FA Provider</label>
+                                <select class="form-select" id="twoFactorProvider" name="twoFactorProvider">
+                                    <option value="google">Google Authenticator</option>
+                                    <option value="authy">Authy</option>
+                                    <option value="sms">SMS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Email Settings -->
+            <div class="tab-pane fade" id="email" role="tabpanel">
+                <div class="settings-section">
+                    <h4>Email Configuration</h4>
+                    <form class="settings-form" data-form-type="email">
+                        <div class="mb-3">
+                            <label for="emailProvider" class="form-label">Email Provider</label>
+                            <select class="form-select" id="emailProvider" name="emailProvider">
+                                <option value="smtp">SMTP</option>
+                                <option value="sendgrid">SendGrid</option>
+                                <option value="mailgun">Mailgun</option>
+                            </select>
+                        </div>
+
+                        <div id="smtpSettings">
+                            <h5>SMTP Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="smtpHost" class="form-label">SMTP Host</label>
+                                        <input type="text" class="form-control" id="smtpHost" name="smtpHost" value="smtp.gmail.com">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="smtpPort" class="form-label">Port</label>
+                                        <input type="number" class="form-control" id="smtpPort" name="smtpPort" value="587">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="smtpEncryption" class="form-label">Encryption</label>
+                                        <select class="form-select" id="smtpEncryption" name="smtpEncryption">
+                                            <option value="tls">TLS</option>
+                                            <option value="ssl">SSL</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="smtpUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="smtpUsername" name="smtpUsername">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="smtpPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="smtpPassword" name="smtpPassword">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" id="testEmailBtn">
+                                <i class="fas fa-paper-plane"></i> Test Email Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- API Settings -->
+            <div class="tab-pane fade" id="api" role="tabpanel">
+                <div class="settings-section">
+                    <h4>API Configuration</h4>
+                    <form class="settings-form" data-form-type="api">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enableAPI" name="enableAPI" checked>
+                                <label class="form-check-label" for="enableAPI">
+                                    Enable API Access
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiRateLimit" class="form-label">Rate Limit (requests/minute)</label>
+                                    <input type="number" class="form-control rate-limit-input" id="apiRateLimit" name="apiRateLimit" value="100" min="1" max="1000">
+                                    <div class="form-text rate-limit-display">100 requests/minute</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiKey" class="form-label">API Key</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="apiKey" name="apiKey" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="generateApiKey">Generate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Backup Settings -->
+            <div class="tab-pane fade" id="backup" role="tabpanel">
+                <div class="settings-section">
+                    <h4>Backup Configuration</h4>
+                    <form class="settings-form" data-form-type="backup">
+                        <div class="mb-3">
+                            <label for="backupFrequency" class="form-label">Backup Frequency</label>
+                            <select class="form-select" id="backupFrequency" name="backupFrequency">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="custom">Custom Schedule</option>
+                            </select>
+                        </div>
+                        <div id="customSchedule" style="display: none;">
+                            <div class="mb-3">
+                                <label for="backupCron" class="form-label">Cron Expression</label>
+                                <input type="text" class="form-control" id="backupCron" name="backupCron" placeholder="0 2 * * * (daily at 2 AM)">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="backupRetention" class="form-label">Retention Period (days)</label>
+                            <input type="number" class="form-control" id="backupRetention" name="backupRetention" value="30" min="1" max="365">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compressBackups" name="compressBackups" checked>
+                                <label class="form-check-label" for="compressBackups">
+                                    Compress Backups
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" id="manualBackupBtn">
+                                <i class="fas fa-play"></i> Run Manual Backup
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Backup History -->
+                    <div class="mt-4">
+                        <h5>Backup History</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="backupHistoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Filename</th>
+                                        <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>backup_2025-12-30.sql.gz</td>
+                                        <td>Database</td>
+                                        <td>2.5 MB</td>
+                                        <td>2025-12-30 10:00</td>
+                                        <td><span class="badge bg-success">Completed</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">Download</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Settings -->
+            <div class="tab-pane fade" id="maintenance" role="tabpanel">
+                <div class="settings-section">
+                    <h4>System Maintenance</h4>
+                    <form class="settings-form" data-form-type="maintenance">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="maintenanceMode" name="maintenanceMode">
+                                <label class="form-check-label" for="maintenanceMode">
+                                    Enable Maintenance Mode
+                                </label>
+                            </div>
+                        </div>
+                        <div id="maintenanceMessage" style="display: none;">
+                            <div class="mb-3">
+                                <label for="maintenanceMsg" class="form-label">Maintenance Message</label>
+                                <textarea class="form-control" id="maintenanceMsg" name="maintenanceMsg" rows="3">The system is currently under maintenance. Please check back later.</textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-warning" id="clearCacheBtn">
+                                        <i class="fas fa-broom"></i> Clear System Cache
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-danger" id="clearSessionsBtn">
+                                        <i class="fas fa-sign-out-alt"></i> Clear All Sessions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- System Information -->
+                    <div class="mt-4">
+                        <h5>System Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Server Status</h6>
+                                        <p class="card-text">
+                                            <span class="badge bg-success">Online</span><br>
+                                            Uptime: 15 days<br>
+                                            Load: 23%
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Storage</h6>
+                                        <p class="card-text">
+                                            Used: 45.2 GB<br>
+                                            Free: 154.8 GB<br>
+                                            Total: 200 GB
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'admin/layout/components/toast.html' %}
+{% include 'admin/layout/components/modal.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/admin/assets/js/settings.js"></script>
+{% endblock %}

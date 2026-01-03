@@ -1,0 +1,62 @@
+/* Custom styles for PDF Finder Advanced */
+[data-bs-theme="dark"] {
+    --bg-color: #111;
+    --card-bg: #222;
+    --text-color: #fff;
+}
+
+[data-bs-theme="light"] {
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #00e5ff;
+    border-color: #00e5ff;
+}
+
+.btn-primary:hover {
+    background-color: #00aac2;
+    border-color: #00aac2;
+}
+
+.list-group-item {
+    border-color: #495057;
+    background: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
